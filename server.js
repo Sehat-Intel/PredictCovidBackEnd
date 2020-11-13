@@ -33,8 +33,6 @@ const connect = mongoose.connect(config.mongoUrl, {
 });
 connect.then((db) => {
     console.log('Connected to the server');
-  
-    const port = 3000
     app.listen(port, () => {
       console.log(`Example app listening at http://localhost:${port}`)
     })
