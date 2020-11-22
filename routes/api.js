@@ -83,6 +83,20 @@ router.get('/records/:id', (req, res ) => {
     })
 })
 
+router.post('/records/:id', (req, res) => {
+    Record.findByIdAndUpdate(req.params.id, {
+        message: req.body.message
+    },  (err, record) => {
+        if ( err) {
+            res.send(err)
+        }
+        else{
+            res.json("Message Updated")
+        }
+
+    })
+})
+
 module.exports = router;
 
 
