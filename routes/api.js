@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config');
 const Doctor = require('../models/Doctor');
 const Record = require('../models/Record');
+const Image = require('../models/Image');
 
 router.get('/users', (req, res) => {
     User.find({}).then((users) => {
@@ -97,8 +98,30 @@ router.post('/records/:id', (req, res) => {
     })
 })
 
-module.exports = router;
+router.get('/image/:id',  (req, res) => {
+    console.log(req.params)
+    Image.findOne({
+        image_id: req.params.id
+    }, (err, image) => {
+        if(err){
+            res.send(err);
+        }
+        else{
+            res.json(image);
+        }
+    })
+})
 
+router.get('/image', (req, res) => {
+    Image.find({}, (images, err) => {
+        if(images){
+            res.json(images)
+        } 
+        else{
+            res.json(err)
+        }
+    })
+})
 
 function verifyToken(req, res, next)  {
     console.log('inside verify token')
@@ -119,3 +142,6 @@ function verifyToken(req, res, next)  {
     next()  
 
 }
+
+
+module.exports = router;
