@@ -16,7 +16,6 @@ router.get('/doctors', (req, res) => {
     })
 });
 
-
 router.get('/records', verifyToken ,(req, res) => {
    Record.find({}).then((records) => {
        res.send(records)
@@ -54,18 +53,17 @@ router.post('/login', (req, res) => {
     Doctor.findOne({email: userData.email}, async(error, user) => {
         console.log(user)
         if(error){
-            console.error();
             res.json(error);
         } else{
             if(!user){
-                res.status(401).send({message : 'Invalid Email'})
+                res.status(401).send({message : 'Invalid email, please sign up'})
             } else{
                 try {
                     if(await bcrypt.compare(userData.password, user.password)) {
                         let token = jwt.sign(user.toJSON(), config.token_secret)
                         res.status(200).send({token});
                     } else {
-                        res.status(401).send({message : 'Invalid password'})
+                        res.status(401).send({message : 'Invalid password, please try again'})
                     }
                   } catch (err){
                     console.log(err)
@@ -88,10 +86,10 @@ router.get('/records/:id', (req, res ) => {
     })
 })
 
-router.post('/records/:id', (req, res) => {
+router.post('/records/message/:id', (req, res) => {
     Record.findByIdAndUpdate(req.params.id, {
         message: req.body.message
-    },  (err, record) => {
+    },  (err, data) => {
         if ( err) {
             res.send(err)
         }
