@@ -1,7 +1,7 @@
 const express = require('express');
 const bp = require('body-parser');
 const mongoose = require('mongoose');
-var logger = require('morgan');
+// var logger = require('morgan');
 
 const cors = require('cors');
 
@@ -16,7 +16,7 @@ app.use(bp.json());
 
 app.use(cors());
 
-app.use(logger('dev'));
+// app.use(logger('dev'));
 
 app.use('/api', apiRouter)
 app.get('/', (req, res) => {

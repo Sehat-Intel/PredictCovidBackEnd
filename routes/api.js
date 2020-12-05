@@ -2,6 +2,7 @@
 const bcrypt = require('bcrypt');
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
+const nodemailer = require("nodemailer");
 
 
 const config = require('../config');
@@ -12,18 +13,19 @@ const verifyToken = require('../middlewares/verifyToken')
 
 router.get('/doctors', (req, res) => {
     Doctor.find({}).then(doctors => {
-        res.send(doctors);
+        res.status(200).send(doctors);
+    }, err => {
+        res.send(err);
     })
 });
 
 router.get('/records', verifyToken ,(req, res) => {
    Record.find({}).then((records) => {
-       res.send(records)
+       res.status(200).send(records)
    })
 })
 
 router.post('/signup', async(req, res) => {
-    console.log('post called')
     try{
         console.log('hello')
         const saltRounds = 10;
@@ -36,11 +38,14 @@ router.post('/signup', async(req, res) => {
         });
 
         console.log(newUser);
-        let savedUser = await newUser.save();
-        res.statusCode = 200;
-        let token = jwt.sign(newUser.toJSON(), config.token_secret)
-        res.status(200).send({token});
-
+        await newUser.save((err, resp) => {
+            if(err){
+                res.status(200).send(err);
+            }
+            res.statusCode = 200;
+            let token = jwt.sign(newUser.toJSON(), config.token_secret)
+            res.status(200).send({token});
+        });
     }
     catch(error){
             res.status(400).send(error);
@@ -66,14 +71,16 @@ router.post('/login', (req, res) => {
                         res.status(401).send({message : 'Invalid password, please try again'})
                     }
                   } catch (err){
-                    console.log(err)
+                    res.send(err)
                   }
             }
         }
     })
 })
 
-router.get('/records/:id', (req, res ) => {
+
+
+router.get('/records/:id', verifyToken,  (req, res ) => {
 
     Record.findById(req.params.id, (err, record) => {
         if ( err) {
@@ -86,7 +93,7 @@ router.get('/records/:id', (req, res ) => {
     })
 })
 
-router.post('/records/message/:id', (req, res) => {
+router.post('/records/message/:id', verifyToken, (req, res) => {
     Record.findByIdAndUpdate(req.params.id, {
         message: req.body.message
     },  (err, data) => {
@@ -94,13 +101,36 @@ router.post('/records/message/:id', (req, res) => {
             res.send(err)
         }
         else{
-            res.json("Message Updated")
+            var transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                  user: config.email,
+                  pass: config.password
+                }
+              });
+            
+              // setup email data with unicode symbols
+              let mailOptions = {
+                  from: 'sehatintel@gmail.com', // sender address
+                  to: `${req.body.email}`, // list of receivers
+                  subject: 'Sehat Intel message by doctor', // Subject line
+                  text: 'Hello world?', // plain text body
+                  html: `<h4>Message by the doctor</h4>
+                        <p>Message: ${req.body.message}</p>` // html body
+              };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    res.send(error);
+                }
+                console.log('Message sent: %s', info.messageId);   
+                res.json('Message updated. Email sent to the user')
+            });
         }
 
     })
 })
 
-router.get('/image/:id',  (req, res) => {
+router.get('/image/:id', verifyToken ,  (req, res) => {
     console.log(req.params)
     Image.findOne({
         image_id: req.params.id
@@ -117,41 +147,3 @@ router.get('/image/:id',  (req, res) => {
 
 
 module.exports = router;
-
-
-// router.get('/users', (req, res) => {
-//     User.find({}).then((users) => {
-//         res.send(users)
-//     })
-// });
-
-// router.get('/image', (req, res) => {
-//     Image.find({}, (images, err) => {
-//         if(images){
-//             res.json(images)
-//         } 
-//         else{
-//             res.json(err)
-//         }
-//     })
-// })
-
-// function verifyToken(req, res, next)  {
-//     console.log('inside verify token')
-//     if(!req.headers.authorization ){
-//         return res.status(401).send("No token passed")
-//     }
-
-//     let token = req.headers.authorization.split(' ')[1]
-//     if (token === 'null'){
-//         return res.status(401).send("Extracted Token is Null")
-//     }
-//     let payload = jwt.verify(token, config.token_secret)
-//     if (!payload){
-//         console.log(payload)
-//         return res.status(401).send("Unauthorized request")
-//     }
-//     req.userId = payload.subject
-//     next()  
-
-// }
