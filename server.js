@@ -17,11 +17,12 @@ app.use(bp.json());
 app.use(cors());
 
 // app.use(logger('dev'));
+app.get('/', (req, res) => {
+  res.send('hello')
+})
 
 app.use('/api', apiRouter)
-app.get('/', (req, res) => {
-    res.send('hello')
-})
+
 
 
 

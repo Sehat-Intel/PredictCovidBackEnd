@@ -9,7 +9,11 @@ const config = require('../config');
 const Doctor = require('../models/Doctor');
 const Record = require('../models/Record');
 const Image = require('../models/Image');
-const verifyToken = require('../middlewares/verifyToken')
+const verifyToken = require('../middlewares/verifyToken');
+
+router.get('/', (req, res) => {
+   res.send('Hello!');
+});
 
 router.get('/doctors', (req, res) => {
     Doctor.find({}).then(doctors => {
