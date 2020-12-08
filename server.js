@@ -1,5 +1,4 @@
 const express = require('express');
-const bp = require('body-parser');
 const mongoose = require('mongoose');
 // var logger = require('morgan');
 
@@ -10,9 +9,7 @@ const config = require('./config')
 
 const port = process.env.PORT || 3000;
 const app = express();
-app.use(bp.json());
-
-
+app.use(express.json());
 
 app.use(cors());
 
@@ -22,8 +19,6 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api', apiRouter)
-
-
 
 
 mongoose.set('useCreateIndex', true);

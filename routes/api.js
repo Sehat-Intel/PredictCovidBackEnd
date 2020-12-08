@@ -31,7 +31,6 @@ router.get('/records', verifyToken ,(req, res) => {
 
 router.post('/signup', async(req, res) => {
     try{
-        console.log('hello')
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(req.body.password, saltRounds)
 
@@ -60,7 +59,6 @@ router.post('/login', (req, res) => {
     let userData = req.body
 
     Doctor.findOne({email: userData.email}, async(error, user) => {
-        console.log(user)
         if(error){
             res.json(error);
         } else{
@@ -82,8 +80,6 @@ router.post('/login', (req, res) => {
     })
 })
 
-
-
 router.get('/records/:id', verifyToken,  (req, res ) => {
 
     Record.findById(req.params.id, (err, record) => {
@@ -93,7 +89,6 @@ router.get('/records/:id', verifyToken,  (req, res ) => {
         else{
             res.send(record)
         }
-
     })
 })
 
@@ -126,28 +121,28 @@ router.post('/records/message/:id', verifyToken, (req, res) => {
                 if (error) {
                     res.send(error);
                 }
-                console.log('Message sent: %s', info.messageId);   
-                res.json('Message updated. Email sent to the user')
+                // console.log('Message sent: %s', info.messageId);   
+                res.json({message:'Message updated. Email sent to the user' });
             });
         }
 
     })
 })
 
-router.get('/image/:id', verifyToken ,  (req, res) => {
-    console.log(req.params)
-    Image.findOne({
-        image_id: req.params.id
-    }, (err, data) => {
-        if(err){
+router.get('/image/:id',  (req, res) => {
+    Image.findOne({image_id: req.params.id }, function (err, data) { 
+        if (err ){ 
+            res.send(err); 
+        } 
+        else if(data == null){
+            err = new Error ('Image not present on the server, please try again later');
             res.send(err);
         }
-        else{
+        else{ 
             res.json(data.image);
-        }
-    })
+        } 
+    }); 
+
 })
-
-
 
 module.exports = router;

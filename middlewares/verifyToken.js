@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config');
 
 function verifyToken(req, res, next)  {
-    console.log('inside verify token')
+    // console.log('inside verify token')
     if(!req.headers.authorization ){
         return res.status(401).send("No token passed")
     }
@@ -13,7 +13,7 @@ function verifyToken(req, res, next)  {
     }
     let payload = jwt.verify(token, config.token_secret)
     if (!payload){
-        console.log(payload)
+        // console.log(payload)
         return res.status(401).send("Unauthorized request")
     }
     req.userId = payload.subject
